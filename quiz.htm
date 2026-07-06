@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Mastery Quiz</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --card-bg: #ffffff;
+            --correct-color: #16a34a;
+            --incorrect-color: #dc2626;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 30px;
+        }
+
+        /* Screen Management */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography */
+        h1, h2 { color: #111827; margin-bottom: 15px; }
+        p { color: #4b5563; line-height: 1.6; margin-bottom: 20px; }
+
+        /* Buttons */
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 600;
+        }
+        button:hover { background-color: var(--primary-hover); }
+        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* Quiz Layout */
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .option-btn {
+            background-color: #f9fafb;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            text-align: left;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .option-btn:hover:not(.selected) { border-color: var(--primary-color); background-color: #eff6ff; }
+        .option-btn.selected {
+            background-color: #eff6ff;
+            border-color: var(--primary-color);
+            color: var(--primary-hover);
+        }
+
+        .quiz-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Results Screen */
+        .score-card {
+            text-align: center;
+            padding: 30px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+        .score-text { font-size: 48px; font-weight: bold; color: var(--primary-color); margin: 10px 0; }
+        .score-stats { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
+        .stat-badge { padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px;}
+        .badge-correct { background-color: #dcfce7; color: var(--correct-color); }
+        .badge-incorrect { background-color: #fee2e2; color: var(--incorrect-color); }
+
+        .review-section { margin-top: 30px; }
+        .review-item {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--incorrect-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .review-question { font-weight: bold; font-size: 16px; margin-bottom: 12px; }
+        .review-answers { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; font-size: 14px;}
+        .your-answer { color: var(--incorrect-color); font-weight: 500;}
+        .correct-answer { color: var(--correct-color); font-weight: 500;}
+        .explanation-box {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #166534;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <h1>HTML Mastery Quiz</h1>
+            <p>Test your front-end knowledge with this comprehensive 20-question HTML assessment. <br><br>
+            <strong>Rules:</strong><br>
+            • 20 Multiple Choice Questions<br>
+            • +1 point for every correct answer<br>
+            • 0 negative marking for incorrect answers<br>
+            • Detailed explanations provided at the end for any mistakes.</p>
+            <button onclick="startQuiz()">Start the Quiz</button>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div id="quiz-screen" class="screen">
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">Question 1 of 20</div>
+            
+            <h2 id="question-text">Question goes here</h2>
+            
+            <div id="options-container" class="options-grid">
+                <!-- Options injected via JS -->
+            </div>
+
+            <div class="quiz-footer">
+                <button id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <!-- RESULT SCREEN -->
+        <div id="result-screen" class="screen">
+            <h1>Quiz Completed!</h1>
+            
+            <div class="score-card">
+                <h2>Your Final Score</h2>
+                <div class="score-text" id="final-score-text">0 / 20</div>
+                <div class="score-stats">
+                    <div class="stat-badge badge-correct" id="correct-count">Correct: 0</div>
+                    <div class="stat-badge badge-incorrect" id="incorrect-count">Incorrect: 0</div>
+                </div>
+            </div>
+
+            <div id="review-container" class="review-section">
+                <h2>Review Incorrect Answers</h2>
+                <p>Here are the questions you missed, along with detailed explanations to help you learn.</p>
+                <div id="incorrect-list">
+                    <!-- Incorrect questions injected via JS -->
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="location.reload()">Take Quiz Again</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Database of 20 HTML Questions
+        const quizData = [
+            {
+                question: "What does HTML stand for?",
+                options: ["Hyper Text Preprocessor", "Hyper Text Markup Language", "Hyper Tool Multi Language", "Hyperlink Text Markup Language"],
+                correct: 1,
+                explanation: "HTML stands for Hyper Text Markup Language. It is the standard markup language used to create and design documents on the World Wide Web."
+            },
+            {
+                question: "Which HTML tag is used to define an internal style sheet?",
+                options: ["<script>", "<css>", "<style>", "<link>"],
+                correct: 2,
+                explanation: "The <style> element contains style information (CSS) for a document. <link> is used for external stylesheets, and <script> is used for JavaScript."
+            },
+            {
+                question: "Which HTML attribute specifies an alternate text for an image, if the image cannot be displayed?",
+                options: ["title", "src", "alt", "longdesc"],
+                correct: 2,
+                explanation: "The 'alt' attribute provides alternative information for an image if a user cannot view it (e.g., due to a slow connection, an error in the src attribute, or if the user uses a screen reader)."
+            },
+            {
+                question: "Which HTML tag is used to create a hyperlink?",
+                options: ["<a>", "<link>", "<href>", "<nav>"],
+                correct: 0,
+                explanation: "The <a> (anchor) tag defines a hyperlink, which is used to link from one page to another. The 'href' attribute indicates the link's destination."
+            },
+            {
+                question: "How do you create an ordered (numbered) list in HTML?",
+                options: ["<ul>", "<list>", "<ol>", "<dl>"],
+                correct: 2,
+                explanation: "<ol> stands for Ordered List, which displays items with numbers by default. <ul> stands for Unordered List, which displays items with bullet points."
+            },
+            {
+                question: "Which HTML element represents the root of an HTML document?",
+                options: ["<body>", "<head>", "<title>", "<html>"],
+                correct: 3,
+                explanation: "The <html> element is the top-level element of an HTML document, often referred to as the root element. All other elements must be descendants of it."
+            },
+            {
+                question: "Which HTML attribute is used to specify that an input field must be filled out before submitting a form?",
+                options: ["validate", "required", "placeholder", "mandatory"],
+                correct: 1,
+                explanation: "The 'required' attribute is a boolean attribute in HTML5. When present, it specifies that an input field must be filled out before submitting the form."
+            },
+            {
+                question: "Which tag is used to display the largest heading in HTML?",
+                options: ["<h6>", "<head>", "<heading>", "<h1>"],
+                correct: 3,
+                explanation: "HTML provides six levels of headings, from <h1> to <h6>. The <h1> tag defines the most important and largest heading."
+            },
+            {
+                question: "What is the correct HTML element for inserting a line break?",
+                options: ["<break>", "<lb>", "<br>", "<hr>"],
+                correct: 2,
+                explanation: "The <br> tag inserts a single line break. It is an empty tag, meaning it does not have an end tag. <hr> is used for a horizontal rule (line)."
+            },
+            {
+                question: "Which HTML tag is used to define a row within a table?",
+                options: ["<td>", "<tr>", "<th>", "<table>"],
+                correct: 1,
+                explanation: "The <tr> tag defines a Table Row. Inside a <tr> element, you can put <th> (Table Header) or <td> (Table Data) elements."
+            },
+            {
+                question: "How do you insert a comment in HTML?",
+                options: ["// This is a comment", "/* This is a comment */", "<!-- This is a comment -->", "<comment>This is a comment</comment>"],
+                correct: 2,
+                explanation: "In HTML, comments are written inside <!-- and -->. They are not displayed in the browser but help document the source code."
+            },
+            {
+                question: "Which HTML5 element is used to specify a footer for a document or section?",
+                options: ["<bottom>", "<footer>", "<section>", "<aside>"],
+                correct: 1,
+                explanation: "The <footer> element represents a footer for its nearest sectioning content. It typically contains information about the author, copyright data, or links to related documents."
+            },
+            {
+                question: "Which <input> type defines a slider control?",
+                options: ["slider", "range", "controls", "number"],
+                correct: 1,
+                explanation: "<input type='range'> defines a control for entering a number whose exact value is not important, typically displayed as a slider."
+            },
+            {
+                question: "Which HTML element is used to display a scalar measurement within a known range?",
+                options: ["<gauge>", "<range>", "<measure>", "<meter>"],
+                correct: 3,
+                explanation: "The <meter> tag defines a scalar measurement within a known range, or a fractional value (e.g., disk usage, relevance of a query result)."
+            },
+            {
+                question: "What is the correct HTML for making a checkbox input?",
+                options: ["<input type='checkbox'>", "<checkbox>", "<check>", "<input type='check'>"],
+                correct: 0,
+                explanation: "The correct syntax is <input type='checkbox'>. It defines a square box that can be toggled on (checked) or off (unchecked)."
+            },
+            {
+                question: "Which attribute specifies the destination URL of a hyperlink?",
+                options: ["src", "link", "href", "url"],
+                correct: 2,
+                explanation: "The 'href' (Hypertext REFerence) attribute specifies the URL of the page the link goes to."
+            },
+            {
+                question: "Which HTML5 element is used to embed video content?",
+                options: ["<media>", "<movie>", "<video>", "<embed>"],
+                correct: 2,
+                explanation: "The <video> element is specifically designed in HTML5 to embed video content in a web page without needing external plugins like Flash."
+            },
+            {
+                question: "What is the default display behavior of a <div> element?",
+                options: ["inline", "inline-block", "flex", "block"],
+                correct: 3,
+                explanation: "A <div> is a block-level element by default. It always starts on a new line and takes up the full width available (stretches out to the left and right as far as it can)."
+            },
+            {
+                question: "Which tag is used to create a dropdown list in HTML?",
+                options: ["<dropdown>", "<list>", "<select>", "<option>"],
+                correct: 2,
+                explanation: "The <select> element is used to create a drop-down list. The <option> tags inside the <select> element define the available options in the list."
+            },
+            {
+                question: "Which HTML attribute is used to apply CSS rules directly to a specific element?",
+                options: ["class", "style", "id", "css"],
+                correct: 1,
+                explanation: "The 'style' attribute is used to apply inline CSS styles to a specific HTML element, overriding global or external styles."
+            }
+        ];
+
+        // State variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOptionIndex = null;
+        let userAnswers = []; // Array to store user's selected indices
+
+        // DOM Elements
+        const screens = {
+            start: document.getElementById('start-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            result: document.getElementById('result-screen')
+        };
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextBtn = document.getElementById('next-btn');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+
+        // Functions
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            switchScreen('quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            selectedOptionIndex = null;
+            nextBtn.disabled = true;
+            nextBtn.textContent = currentQuestionIndex === quizData.length - 1 ? "Finish Quiz" : "Next Question";
+            
+            const currentQuestion = quizData[currentQuestionIndex];
+            
+            // Update Progress
+            progressText.textContent = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
+
+            // Load Question Text
+            questionText.textContent = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+
+            // Load Options
+            optionsContainer.innerHTML = '';
+            currentQuestion.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectOption(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(index, buttonElement) {
+            selectedOptionIndex = index;
+            
+            // Remove 'selected' class from all buttons
+            const allOptions = optionsContainer.children;
+            for (let i = 0; i < allOptions.length; i++) {
+                allOptions[i].classList.remove('selected');
+            }
+            
+            // Add 'selected' to clicked button
+            buttonElement.classList.add('selected');
+            
+            // Enable Next button
+            nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            // Save answer
+            userAnswers.push(selectedOptionIndex);
+
+            // Check if correct
+            if (selectedOptionIndex === quizData[currentQuestionIndex].correct) {
+                score++;
+            }
+
+            // Move to next question or show results
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            switchScreen('result');
+            
+            const total = quizData.length;
+            const incorrectCount = total - score;
+
+            // Populate Score summary
+            document.getElementById('final-score-text').textContent = `${score} / ${total}`;
+            document.getElementById('correct-count').textContent = `Correct: ${score}`;
+            document.getElementById('incorrect-count').textContent = `Incorrect: ${incorrectCount}`;
+
+            // Populate Incorrect Reviews
+            const reviewContainer = document.getElementById('review-container');
+            const incorrectList = document.getElementById('incorrect-list');
+            incorrectList.innerHTML = '';
+
+            if (incorrectCount === 0) {
+                reviewContainer.innerHTML = '<h2>Perfect Score!</h2><p>You answered every question correctly. Excellent job!</p>';
+            } else {
+                quizData.forEach((q, index) => {
+                    const userAnsIndex = userAnswers[index];
+                    if (userAnsIndex !== q.correct) {
+                        
+                        const userAnswerText = userAnsIndex !== null ? q.options[userAnsIndex] : "No answer selected";
+                        const correctAnswerText = q.options[q.correct];
+
+                        const reviewHTML = `
+                            <div class="review-item">
+                                <div class="review-question">${index + 1}. ${q.question}</div>
+                                <div class="review-answers">
+                                    <span class="your-answer">✗ Your Answer: ${userAnswerText}</span>
+                                    <span class="correct-answer">✓ Correct Answer: ${correctAnswerText}</span>
+                                </div>
+                                <div class="explanation-box">
+                                    <strong>Explanation:</strong> ${q.explanation}
+                                </div>
+                            </div>
+                        `;
+                        incorrectList.insertAdjacentHTML('beforeend', reviewHTML);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
