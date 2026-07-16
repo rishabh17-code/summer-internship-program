@@ -1,10 +1,10 @@
-import Student from "./Student";
+// import Student from "./component/Student";
 function App(){
-     let name = "rishabh";
+    //  let name = "rishabh";
     return (
-   <div> <h1>hello {name} </h1>
-    <Student />
-    <Student /></div>
+//    <div> <h1>hello {name} </h1>
+//     <Student />
+//     <Student /></div>
     );
-}
+}                                
 export default App;
