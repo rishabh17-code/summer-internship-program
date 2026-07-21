@@ -1,16 +1,15 @@
 // import Student from "./component/Student";
 // import Counter from "./hooks-state/usestate";
-// import RegistrationForm from "./component/RegistrationForm";
-import JobPortalForm from "./component/JobPortalForm"
+// import JobPortalForm from "./component/JobPortalForm";
+import DataFetcher from "./hooks-state/useeffect";
 
 function App(){
-    //  let name = "rishabh";
     return (
         <div>
-            <JobPortalForm/>
+            <DataFetcher/>
         </div>
         // <div>
-        //     <RegistrationForm/>
+        //     <JobPortalForm/>
         // </div>
         // <div>
         //     <Counter/>
